@@ -13,6 +13,22 @@ users = {
     'admin' : {'password': 'admin', 'role': 'admin',  'apiCount':0 , 'apiLastCall' : None, 'apiWindowStart': None}
 }
 
+orders = {
+    1: {
+        "product_name": "Laptop",
+        "quantity": 1,
+        "price": 999.99,
+        "customer": "john_doe",
+        "status": "processing"
+    },
+    2: {
+        "product_name": "Smartphone",
+        "quantity": 2,
+        "price": 699.99,
+        "customer": "jane_smith",
+        "status": "shipped"
+    }}
+
 
 @app.route('/login', methods = ['GET','POST'])
 def login():
@@ -100,23 +116,32 @@ def token_rate_limiter(max_requests = 4 , window_seconds = 60):
        
 
 # accessible by all roles
-@app.route('/orders/view', methods=['POST'])
+@app.route('/orders/view', methods=['GET'])
 @role_required(['admin', 'customer', 'manager'])
 @token_rate_limiter(4, 60)
-def view_orders():    
-    return ''
+def view_orders():     
+    return jsonify(orders)
 
 # accessible by manager, admin
-@app.route('/orders/update')
+@app.route('/orders/update/<int:order_id>', methods=['PUT'])
 @role_required(['admin', 'manager'])
-def update_orders():
-    return ''
+def update_orders(order_id):
+    if order_id not in orders:
+        return jsonify({'error': 'Order not found'}), 404
+
+    order_data = request.get_json()
+    orders[order_id] = order_data
+    return jsonify({'order_id':order_id , 'product':order_data}), 201
 
 # accessible by admin only
-@app.route('/orders/delete')
+@app.route('/orders/delete/<int:order_id>', methods=['DELETE'])
 @role_required(['admin'])
-def delete_orders():
-    return ''
+def delete_orders(order_id):
+    if order_id not in orders:
+        return jsonify({'error': 'Order not found'})
+
+    orders.pop(order_id)
+    return jsonify({'Success': f'Order {order_id} is removed'})
 
 
 if __name__ == '__main__':
