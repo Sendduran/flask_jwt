@@ -17,6 +17,7 @@ A secure Flask API with JWT authentication, role-based access control, and rate 
 ### 1. Clone the repository
 
 git clone https://github.com/Sendduran/flask_jwt.git
+
 cd flask-jwt
 
 ### 2. Install dependencies
