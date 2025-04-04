@@ -46,7 +46,6 @@ def login():
     
     return jsonify({'token': token})
 
-
 def role_required(roles):
     def wrapper (f):
         @wraps(f)
@@ -125,6 +124,7 @@ def view_orders():
 # accessible by manager, admin
 @app.route('/orders/update/<int:order_id>', methods=['PUT'])
 @role_required(['admin', 'manager'])
+@token_rate_limiter(4, 60)
 def update_orders(order_id):
     if order_id not in orders:
         return jsonify({'error': 'Order not found'}), 404
@@ -136,6 +136,7 @@ def update_orders(order_id):
 # accessible by admin only
 @app.route('/orders/delete/<int:order_id>', methods=['DELETE'])
 @role_required(['admin'])
+@token_rate_limiter(4, 60)
 def delete_orders(order_id):
     if order_id not in orders:
         return jsonify({'error': 'Order not found'})
